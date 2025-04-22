@@ -1,0 +1,35 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create destination directory if not exists
+      file:
+        path: /opt/fullstack-app
+        state: directory
+        mode: '0755'
+
+    - name: Copy app files to the server
+      copy:
+        src: ../fullstack-devops-project-updated/
+        dest: /opt/fullstack-app/
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Launch application using Docker Compose
+      command: docker-compose up -d
+      args:
+        chdir: /opt/fullstack-app
